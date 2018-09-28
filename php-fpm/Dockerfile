@@ -1,5 +1,9 @@
 FROM alpine:3.8
 
+ENV TIMEZONE UTC
+ENV MEMORY_LIMIT 2G
+ENV MAX_EXECUTION_TIME 0
+
 RUN apk add --update \
     php7-fpm \
     php7-apcu \
@@ -41,6 +45,10 @@ ADD php.ini /etc/php7/cli/conf.d/
 ADD xdebug.ini  /etc/php7/conf.d/
 
 ADD symfony.pool.conf /etc/php7/php-fpm.d/
+
+RUN sed -i "s|;*date.timezone =.*|date.timezone = ${TIMEZONE}|i" /etc/php7/php.ini && \
+	sed -i "s|;*memory_limit =.*|memory_limit = ${MEMORY_LIMIT}|i" /etc/php7/php.ini && \
+	sed -i "s|;*max_execution_time =.*|max_execution_time = ${MAX_EXECUTION_TIME}|i" /etc/php7/php.ini
 
 CMD ["php-fpm7", "-F"]
 
