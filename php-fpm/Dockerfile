@@ -33,6 +33,7 @@ RUN apk add --update \
     php7-xdebug \
     php7-fileinfo \
     php7-exif \
+    php7-zip \
     make \
     curl \
     vim
