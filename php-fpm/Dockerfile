@@ -1,8 +1,14 @@
 FROM alpine:3.8
 
+ARG uid
+ARG gid
+
 ENV TIMEZONE UTC
 ENV MEMORY_LIMIT 2G
 ENV MAX_EXECUTION_TIME 0
+
+RUN addgroup -g ${gid} -S app \
+    && adduser -D -S -u ${uid} -g ${gid} -s /bin/bash app app
 
 RUN apk add --update \
     php7-fpm \
@@ -39,7 +45,12 @@ RUN apk add --update \
     vim
 
 RUN rm -rf /var/cache/apk/* && rm -rf /tmp/* && \
-    curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x /usr/bin/composer
+    curl --insecure https://getcomposer.org/composer.phar -o /usr/bin/composer && chmod +x /usr/bin/composer \
+    && sed -i -E "s/^user *=.+$/user = app/" /etc/php7/php-fpm.d/www.conf \
+    && sed -i -E "s/^group *=.+$/group = app/" /etc/php7/php-fpm.d/www.conf \
+    && mkdir -p /app \
+    && chown app /app \
+    && chown -R app:app /app
 
 ADD php.ini /etc/php7/php-fpm.d/
 ADD php.ini /etc/php7/cli/conf.d/
@@ -53,5 +64,5 @@ RUN sed -i "s|;*date.timezone =.*|date.timezone = ${TIMEZONE}|i" /etc/php7/php.i
 
 CMD ["php-fpm7", "-F"]
 
-WORKDIR /var/www
+WORKDIR /app
 EXPOSE 9000

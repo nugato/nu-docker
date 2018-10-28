@@ -1,4 +1,4 @@
-version: '2'
+version: '3.2'
 services:
     mariadb:
         container_name: ${PROJECT_NAME}_mariadb
@@ -15,15 +15,17 @@ services:
             - '/var/lib/mysql'
     php:
         container_name: ${PROJECT_NAME}_php
-        build: ./php-fpm
+        build:
+            context: php-fpm
+            args:
+                uid: ${APP_USER_ID}
+                gid: ${APP_GROUP_ID}
         ports:
             - "9000:9000"
         volumes:
-            - ${ROOT_PATH}:/var/www:cached
+            - ${ROOT_PATH}:/app:cached
         links:
             - mariadb
-        extra_hosts:
-            - "docker.host:127.0.0.1"
     nginx:
         container_name: ${PROJECT_NAME}_nginx
         build: ./nginx
@@ -31,7 +33,19 @@ services:
             - "80:80"
         links:
             - php
-        volumes_from:
-            - php
         volumes:
             - ./logs/nginx/:/var/log/nginx:cached
+            - ${ROOT_PATH}:/app:cached
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        container_name: ${PROJECT_NAME}_phpmyadmin
+        environment:
+            - PMA_ARBITRARY=1
+        restart: always
+        links:
+            - mariadb
+        ports:
+            - 8180:80
+        volumes:
+            - /sessions
