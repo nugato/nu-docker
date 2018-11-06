@@ -27,6 +27,7 @@ RUN apk add --update \
     php7-openssl \
     php7-pdo \
     php7-pdo_mysql \
+    php7-pdo_sqlite \
     php7-mysqli \
     php7-xml \
     php7-xmlreader \
@@ -40,6 +41,7 @@ RUN apk add --update \
     php7-fileinfo \
     php7-exif \
     php7-zip \
+    php7-soap \
     make \
     curl \
     vim
